@@ -1,6 +1,8 @@
 flask
 selenium
 selenium-wire
+undetected-chromedriver
+chromedriver-autoinstaller
 webdriver-manager
 gunicorn
 blinker==1.4
