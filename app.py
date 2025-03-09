@@ -9,6 +9,7 @@ from seleniumwire import webdriver  # Import from seleniumwire
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service  # Import Service for Selenium 4
 from webdriver_manager.chrome import ChromeDriverManager
+import chromedriver_autoinstaller  # Added import
 
 app = Flask(__name__)
 
@@ -26,7 +27,7 @@ def init_driver():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    # Initialize WebDriver
+    # Initialize WebDriver using an empty Service object (webdriver_manager not used here)
     service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
