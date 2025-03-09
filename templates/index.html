@@ -1,1 +1,89 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Twitter Scraper</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    label { display: block; margin-top: 1em; }
+    input[type="text"] { width: 100%; padding: 8px; }
+    button { padding: 10px 15px; margin-top: 15px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f4f4f4; }
+    #progress { margin-top: 20px; font-weight: bold; }
+    #notice { color: red; margin-top: 10px; }
+  </style>
+  <script>
+    function scrape() {
+      document.getElementById("progress").innerText = "Scraping started...";
+      let formData = new URLSearchParams();
+      formData.append("auth_token", document.getElementById("auth_token").value);
+      formData.append("ct0", document.getElementById("ct0").value);
+      formData.append("profiles", document.getElementById("profiles").value);
+      
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.error) {
+          document.getElementById("progress").innerText = data.error;
+          return;
+        }
+        document.getElementById("progress").innerText = data.progress;
+        let results = data.results;
+        let table = "<table><tr><th>Username</th><th>Followers</th><th>Following</th><th>Listed</th><th>Location</th></tr>";
+        results.forEach(row => {
+          table += `<tr>
+                      <td>${row.username || '-'}</td>
+                      <td>${row.followers_count || '-'}</td>
+                      <td>${row.friends_count || '-'}</td>
+                      <td>${row.listed_count || '-'}</td>
+                      <td>${row.location || '-'}</td>
+                    </tr>`;
+        });
+        table += "</table>";
+        document.getElementById("results").innerHTML = table;
+        document.getElementById("copy_button").style.display = "block";
+      });
+    }
+    
+    function copyToClipboard() {
+      let range = document.createRange();
+      range.selectNode(document.getElementById("results"));
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      try {
+        document.execCommand('copy');
+        alert("Copied to clipboard!");
+      } catch(err) {
+        alert("Unable to copy.");
+      }
+      window.getSelection().removeAllRanges();
+    }
+  </script>
+</head>
+<body>
+  <h1>Twitter Scraper</h1>
+  <p id="notice">Note: For best results, please do not enter more than 300-500 profiles at once.</p>
+  <form onsubmit="event.preventDefault(); scrape();">
+    <label>Twitter auth_token (from session cookies):</label>
+    <input type="text" id="auth_token" required>
+    
+    <label>Twitter ct0 token (from session cookies):</label>
+    <input type="text" id="ct0" required>
+    
+    <label>Twitter profiles to scrape (comma separated, e.g., LangChainAI,FlowiseAI):</label>
+    <input type="text" id="profiles" required>
+    
+    <button type="submit">Start Scraping</button>
+  </form>
+  
+  <div id="progress"></div>
+  <div id="results"></div>
+  <button id="copy_button" style="display:none;" onclick="copyToClipboard()">Copy to Clipboard</button>
+</body>
+</html>
